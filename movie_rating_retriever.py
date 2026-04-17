@@ -23,22 +23,6 @@ REQUEST_DELAY = 0.35
 TMDB_FIND_URL = "https://api.themoviedb.org/3/find/{}"
 OMDB_URL = "http://www.omdbapi.com/"
 
-def fetch_tmdb_data(imdb_id):
-    try:
-        url = f"{TMDB_FIND_URL.format(imdb_id)}?api_key={creds.tmdb_api_key}"
-        response = requests.get(url, timeout=10)
-        if response.status_code == 200:
-            data = response.json()
-            if data.get('movie_results'):
-                movie = data['movie_results'][0]
-                return {
-                    "TMDB_Score": movie.get("vote_average", "N/A"),
-                    "TMDB_Vote_Count": movie.get("vote_count", "N/A")
-                }
-    except:
-        pass
-    return {"TMDB_Score": "N/A", "TMDB_Vote_Count": "N/A"}
-
 def fetch_rt_tomatometer(imdb_id):
     try:
         url = f"{OMDB_URL}?i={imdb_id}&apikey={creds.omdb_api_key}"
@@ -56,6 +40,25 @@ def fetch_rt_tomatometer(imdb_id):
         pass
     return {"RT_Tomatometer": "N/A"}
 
+def fetch_tmdb_data(imdb_id):
+    try:
+        response = requests.get(
+            TMDB_FIND_URL.format(imdb_id),
+            params={"api_key": creds.tmdb_api_key, "external_source": "imdb_id"},
+            timeout=10
+        )
+        if response.status_code == 200:
+            data = response.json()
+            if data.get('movie_results'):
+                movie = data['movie_results'][0]
+                return {
+                    "TMDB_Score": movie.get("vote_average", "N/A"),
+                    "TMDB_Vote_Count": movie.get("vote_count", "N/A")
+                }
+    except:
+        pass
+    return {"TMDB_Score": "N/A", "TMDB_Vote_Count": "N/A"}
+
 def main():
     csv_path = input("Enter the path to your CSV file: ").strip()
     
@@ -65,7 +68,7 @@ def main():
     
     df = pd.read_csv(csv_path)
     all_results = []
-    
+
     for idx, row in df.iterrows():
         imdb_id = row['id']
         title = row['title']
@@ -87,7 +90,7 @@ def main():
     # Save results
     output_df = pd.DataFrame(all_results)
     base, _ = os.path.splitext(csv_path)
-    out_path = base + "_with_ratings.csv"
+    out_path = base + "_with_tmdb_ratings.csv"
     output_df.to_csv(out_path, index=False)
     print(f"\nResults saved to: {out_path}")
 
