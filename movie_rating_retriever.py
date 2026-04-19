@@ -1,5 +1,5 @@
 """
-Movie Ratings Retriever
+Movie Rating Retriever
 ==========================================
 Uses IMDB movie id
 
@@ -10,6 +10,8 @@ Fetches:
 API Keys:
     - TMDB : https://www.themoviedb.org/settings/api
     - OMDB : http://www.omdbapi.com/apikey.aspx
+
+Models used to generate code: quen-coder:30b && Sonnet 4.6
 """
 
 import os
